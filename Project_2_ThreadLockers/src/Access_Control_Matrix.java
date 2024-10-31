@@ -1,26 +1,37 @@
 import java.util.Random;
+import java.util.concurrent.locks.Lock;
 
 
 public class Access_Control_Matrix implements Runnable{
-
+    // Could honestly have one random
+    //
     static Random nValue = new Random();
     static Random mValue = new Random();
     static Random access_Value = new Random();
     static Random domain_Value = new Random();
+    static Random X = new Random();
     static String [] [] access_Matrix;
+    static Random random = new Random();
+    static Lock accessLock;
+    int thread_ID;
+    int requestCount = 5;
+    static int mBound;
+    static int nBound;
+    static int oDomains;
 
     public static void main (String args[]) {
         System.out.println("Hello World!");
-        int nBound = nValue.nextInt(3, 8);
-        int mBound = mValue.nextInt(3, 8);
+        nBound = nValue.nextInt(3, 8);
+        mBound = mValue.nextInt(3, 8);
+        oDomains = nBound - 1;                          // Other Domains
 
-        access_Matrix = new String [nBound] [mBound + nBound];
+        access_Matrix = new String [nBound] [mBound + oDomains];
 
 
         // Creating the array with the file acces and domain access established.
         for (int i = 0; i < nBound; i++) {
-            // Reading the second section array for the values
-            for (int j = 0; j < (mBound + nBound); j++) {
+            // Fillin the second section array for the values
+            for (int j = 0; j < (mBound + oDomains); j++) {
                 if (j < mBound) {
                     access_Matrix[i][j] = file_Access();
                 }
@@ -34,16 +45,35 @@ public class Access_Control_Matrix implements Runnable{
                 }
             }
         }
-        System.out.println(nBound + " Domains \n" + mBound + " Files\n" + access_Matrix);
+        System.out.println(nBound + " Domains \n" + mBound + " Files\n" );
+        System.out.printf("%-15s", "Domain/File");
+        for (int i = 0; i< mBound; i++) {
+            System.out.printf("%-8s", "F" + i);
+        }
+
+        for (int i = 0; i < oDomains; i++) {
+            System.out.printf("%-8s", "D" + i);
+        }
+        System.out.println();
+
+        // The Print Section
+        for (int i = 0; i < nBound; i++) {
+            System.out.printf("%-15s", "D" + (i));
+            for (int j = 0; j < mBound + oDomains; j++) {
+                System.out.printf("%-8s", access_Matrix[i][j]);
+            }
+            System.out.println();
+        }
+
 
         for (int i = 0; i < nBound; i++) {
-            for (int j = 0; j < mBound + nBound; j++) {
-                System.out.println(access_Matrix[i][j]);
-            }
+            Access_Control_Matrix ta = new Access_Control_Matrix(i, mBound, nBound, oDomains);
+            Thread acT = new Thread (ta);
+
         }
     }
 
-
+//------------------------- [Start Filling matrix functions] --------------------//
     static String file_Access() {
         int value = access_Value.nextInt(0,4);
         if (value == 0) {
@@ -70,9 +100,59 @@ public class Access_Control_Matrix implements Runnable{
         }
         return "";
     }
+// ---------------------- [End of Fill Matrix function] ---------------- //
+
+    public Access_Control_Matrix (int tID, int mFiles, int nDomains, int otherDomains) {
+        this.thread_ID = tID;
+        this.mBound = mFiles;
+        this.nBound = nDomains;
+        this.oDomains = otherDomains;
+    }
+
+    public void threadFileAction (int x) {
+        int rORw = random.nextInt(0,2); // 0 - Read, 1 - Write
+        int randYield = random.nextInt(3, 8);
+
+        if (access_Matrix[thread_ID][x] == "R" && rORw == 0) {
+            accessLock.lock();
+            for (int i = 0; i < randYield; i++) {
+                Thread.yield();
+            }
+            accessLock.unlock();
+            requestCount--;
+        }
+        else {
+            
+        }
+
+
+    }
+
+    public void threadDomainAction () {
+
+    }
+
+    public void threadRequestManager () {
+        int x = X.nextInt(0, oDomains);
+        while (requestCount != 0) {
+            if (x < mBound) {
+                threadFileAction(x);
+            }
+            if (x > mBound && x <= oDomains) {
+                threadDomainAction();
+            }
+        }
+    }
+
+
+
+
+
 
     @Override
      public void run() {
+
+
 
     }
 
