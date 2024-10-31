@@ -114,15 +114,18 @@ public class Access_Control_Matrix implements Runnable{
         int randYield = random.nextInt(3, 8);
 
         if (access_Matrix[thread_ID][x] == "R" && rORw == 0) {
+            System.out.println("[Thread " + thread_ID + "(D" + thread_ID + " )] Attempting to read F" + x + ":  Permission Granted" );
             accessLock.lock();
             for (int i = 0; i < randYield; i++) {
                 Thread.yield();
             }
             accessLock.unlock();
             requestCount--;
-        }
-        else {
-            
+        } else if (access_Matrix[thread_ID][x] == "W" && rORw == 1) {
+            System.out.println("[Thread " + thread_ID + "(D" + thread_ID + " )] Attempting to write F" + x + ":  Permission Granted" );
+
+        } else {
+            System.out.println("[Thread " + thread_ID + "(D" + thread_ID + " )] Attempting to read F" + x + ":  Permission Denied....." );
         }
 
 
