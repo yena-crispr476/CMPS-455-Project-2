@@ -1,6 +1,11 @@
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+/**
+ * The `CapabilityBasedAccessControl` class implements a capability-based access control system for files.
+ * It manages a domain, a set of capabilities, and performs access control checks for read and write operations
+ * on threads.
+ */
 // programmed by Aaron Delahoussaye
 public class CapabilityBasedAccessControl implements Runnable {
     private Domain domain;
@@ -9,6 +14,15 @@ public class CapabilityBasedAccessControl implements Runnable {
     private AtomicInteger requests = new AtomicInteger(0);
     private LockableFile[] files;
 
+    /**
+     * Constructor for initializing the CapabilityBasedAccessControl object with required parameters.
+     *
+     * @param domain The domain to which the capabilities belong.
+     * @param capabilities A list of capabilities that define permissions.
+     * @param threadID The ID of the thread being initialized.
+     * @param files An array of files that can be accessed and locked by this object.
+     * @throws IllegalArgumentException if any of the constructor arguments are null.
+     */
     // Added by Aaron Delahoussaye: Constructor for initializing the object with required parameters.
     public CapabilityBasedAccessControl(Domain domain, List<Capability> capabilities, int threadID, LockableFile[] files) {
         if (domain == null || capabilities == null || files == null) {
@@ -20,6 +34,24 @@ public class CapabilityBasedAccessControl implements Runnable {
         this.files = files;
     }
 
+    /**
+     * Executes the logic for a thread to perform random read/write operations on an array of files.
+     * The method continuously selects a random file and attempts either a read or write operation
+     * based on randomly generated criteria, respecting access control mechanisms.
+     *
+     * The thread selects operations randomly until a pre-defined number of requests is reached.
+     * For each operation, it checks whether the operation is allowed using the provided capabilities.
+     * If the operation is allowed, it acquires the appropriate lock, performs a simulated operation by sleeping,
+     * and then releases the lock. If the operation is not allowed, it logs an access denied message.
+     *
+     * The method makes use of the following class fields:
+     * - `requests`: An AtomicInteger tracking the number of requests made by the thread.
+     * - `files`: An array of `LockableFile` objects on which the operations are performed.
+     * - `threadID`: An identifier for the thread.
+     *
+     * The method relies on the `isOperationAllowed` method to determine if an operation can be performed
+     * and uses the locking mechanism provided by the `LockableFile` class for handling concurrent read and write operations.
+     */
     // Added by Aaron Delahoussaye: Method executed when the thread is run, performing random read/write operations.
     @Override
     public void run() {
@@ -51,6 +83,13 @@ public class CapabilityBasedAccessControl implements Runnable {
         }
     }
 
+    /**
+     * Checks if the requested operation is allowed on the specified object.
+     *
+     * @param objectID The identifier of the object on which the operation is to be performed.
+     * @param operation The type of operation requested (e.g., "read", "write").
+     * @return true if the operation is allowed according to the capabilities; false otherwise.
+     */
     // Added by Aaron Delahoussaye: Method checking if the requested operation is allowed.
     private boolean isOperationAllowed(int objectID, String operation) {
         for (Capability capability : capabilities) {

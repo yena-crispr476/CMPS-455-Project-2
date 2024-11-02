@@ -1,6 +1,10 @@
 import java.io.File;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * LockableFile adds read-write locking functionality to the standard File class.
+ * It leverages ReentrantReadWriteLock to provide fine-grained access control.
+ */
 public class LockableFile extends File {
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
