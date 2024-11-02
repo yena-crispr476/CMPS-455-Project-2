@@ -34,9 +34,9 @@ public class AccessListsForObjects implements Runnable {
         while (requests < 5) {
             isNull = false;
             succeeded = false;
-            int permission = random.nextInt(1, M + N + 1);
+            int permission = random.nextInt(0, M + N);
             while(domain[IDN].equals(permissions[permission][0])){
-                permission = random.nextInt(1, M + N + 1);
+                permission = random.nextInt(0, M + N);
             }
             if (permission <= M){
                 readOrWrite = random.nextInt(1, 3);
