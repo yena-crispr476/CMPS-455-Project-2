@@ -88,7 +88,7 @@ public class AccessListsForObjects implements Runnable {
                 }
                 else {
                     int j = random.nextInt(3, 8);
-                    System.out.println("[Thread: " + threadID + "(" + domain[IDN] + ")(Request:" + (requests + 1) + ")] is yeilding " + j + " times.");
+                    System.out.println("[Thread: " + threadID + "(" + domain[IDN] + ")(Request:" + (requests + 1) + ")] is yielding " + j + " times.");
                     for (int i = 1; i < j; i++){
                         Thread.yield();
                     }
