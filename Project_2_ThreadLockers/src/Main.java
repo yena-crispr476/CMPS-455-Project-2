@@ -5,9 +5,27 @@ import java.util.Set;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
-        printUsage();
-        runTask1();
+        if (args.length != 2 || !args[0].equals("-S")) {
+            printUsage();
+            return; // Exit if the command line arguments are invalid
+        }
+
+        String taskNumber = args[1];
+        switch (taskNumber) {
+            case "1":
+                runTask1();
+                break;
+            case "2":
+               // runTask2();
+                break;
+            case "3":
+                runTask3();
+                break;
+            default:
+                System.out.println("Error: Invalid task number. Please provide a valid task number (1, 2, or 3).");
+                printUsage();
+                break;
+        }
     }
 
     // Added by Aaron Delahoussaye: To print command usage
