@@ -1,7 +1,7 @@
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
-
+// programmed by Aaron Delahoussaye
 public class CapabilityBasedAccessControl implements Runnable {
     private Domain domain;
     private List<Capability> capabilities;
@@ -9,6 +9,7 @@ public class CapabilityBasedAccessControl implements Runnable {
     private AtomicInteger requests = new AtomicInteger(0);
     private LockableFile[] files;
 
+    // Added by Aaron Delahoussaye: Constructor for initializing the object with required parameters.
     public CapabilityBasedAccessControl(Domain domain, List<Capability> capabilities, int threadID, LockableFile[] files) {
         if (domain == null || capabilities == null || files == null) {
             throw new IllegalArgumentException("Constructor arguments must not be null");
@@ -19,6 +20,7 @@ public class CapabilityBasedAccessControl implements Runnable {
         this.files = files;
     }
 
+    // Added by Aaron Delahoussaye: Method executed when the thread is run, performing random read/write operations.
     @Override
     public void run() {
         Random random = new Random();
@@ -26,7 +28,6 @@ public class CapabilityBasedAccessControl implements Runnable {
             int objectID = random.nextInt(files.length);
             String operation = random.nextBoolean() ? "read" : "write";
             boolean allowed = isOperationAllowed(objectID, operation);
-
             if (allowed) {
                 try {
                     if ("read".equals(operation)) {
@@ -50,6 +51,7 @@ public class CapabilityBasedAccessControl implements Runnable {
         }
     }
 
+    // Added by Aaron Delahoussaye: Method checking if the requested operation is allowed.
     private boolean isOperationAllowed(int objectID, String operation) {
         for (Capability capability : capabilities) {
             if (capability.getObjectID() == objectID) {

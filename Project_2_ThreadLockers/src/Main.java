@@ -8,6 +8,7 @@ public class Main {
         System.out.println("Hello world!");
     }
 
+    // Added by Aaron Delahoussaye: To print command usage
     private static void printUsage() {
         System.out.println("Usage: java Main -S <task_number>");
         System.out.println("Tasks:");
@@ -16,6 +17,7 @@ public class Main {
         System.out.println("  -S 3 : Task 3: Capability List for Domains");
     }
 
+    // Added by Aaron Delahoussaye: to access and run Task 3
     private static void runTask3() {
         Domain domain = new Domain(1);
 
