@@ -6,6 +6,7 @@ import java.util.Set;
 public class Main {
     public static void main(String[] args) {
         System.out.println("Hello world!");
+        printUsage();
     }
 
     // Added by Aaron Delahoussaye: To print command usage

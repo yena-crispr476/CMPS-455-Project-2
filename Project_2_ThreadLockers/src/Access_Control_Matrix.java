@@ -15,11 +15,9 @@ public class Access_Control_Matrix implements Runnable{
     static int mBound;
     static int nBound;
     static int oDomains;
-    int rValue;
     int currentDomain;
 
     public static void main (String args[]) {
-        System.out.println("Hello World!");
         nBound = random.nextInt(3, 8);
         mBound = random.nextInt(3, 8);
         oDomains = nBound - 1;                          // Other Domains
@@ -35,7 +33,7 @@ public class Access_Control_Matrix implements Runnable{
         for (int i = 0; i < mBound; i++) {
             fileSem[i] = new Semaphore(1);
         }
-        // Creating the array with the file acces and domain access established.
+        // Creating the array with the file access and domain access established.
         for (int i = 0; i < nBound; i++) {
             // Fillin the second section array for the values
             for (int j = 0; j < (mBound + oDomains); j++) {
@@ -52,6 +50,7 @@ public class Access_Control_Matrix implements Runnable{
                 }
             }
         }
+        // Header and Column labels
         System.out.println(nBound + " Domains \n" + mBound + " Files\n" );
         System.out.printf("%-15s", "Domain/File");
         for (int i = 0; i< mBound; i++) {
@@ -118,6 +117,7 @@ public class Access_Control_Matrix implements Runnable{
         this.currentDomain = tID;
     }
 
+    //
     public void threadFileAction (int fileIndex) {
         int rORw = random.nextInt(2); // 0 - Read, 1 - Write
         int randYield = random.nextInt(3, 8);
@@ -181,6 +181,7 @@ public class Access_Control_Matrix implements Runnable{
         }
     }
 
+    // Overhead function that manages the thread interactions, requestCount, and if the threads do file actions or domain actions
     public void threadRequestManager () {
         while (requestCount > 0) {
             int target = random.nextInt(mBound + oDomains);
