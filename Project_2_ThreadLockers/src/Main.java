@@ -7,6 +7,7 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Hello world!");
         printUsage();
+        runTask1();
     }
 
     // Added by Aaron Delahoussaye: To print command usage
@@ -17,6 +18,12 @@ public class Main {
         System.out.println("  -S 2 : Task 2: Access List for Objects");
         System.out.println("  -S 3 : Task 3: Capability List for Domains");
     }
+
+    private static void runTask1() {
+        System.out.println("Running: Task 1 -- Access Matrix");
+        Access_Control_Matrix.main(new String[]{});
+    }
+
 
     // Added by Aaron Delahoussaye: to access and run Task 3
     private static void runTask3() {
