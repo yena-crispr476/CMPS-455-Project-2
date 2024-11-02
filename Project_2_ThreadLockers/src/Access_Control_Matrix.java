@@ -1,7 +1,5 @@
 import java.util.Random;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.Lock;
-
 
 public class Access_Control_Matrix implements Runnable{
     // Could honestly have one random
@@ -9,6 +7,8 @@ public class Access_Control_Matrix implements Runnable{
     static String [] [] access_Matrix;
     static String [] fileContents = {"Red", "Yellow", "Blue", "Indigo", "Violet", "Rap", "Rock", "Punk", "and ohh... what's this? JAZZ"};
     static Semaphore[] fileSem;
+    static Semaphore mutex;
+    static  Semaphore area;
     static Random random = new Random();
     int thread_ID;
     int requestCount = 5;
@@ -24,18 +24,23 @@ public class Access_Control_Matrix implements Runnable{
         mBound = random.nextInt(3, 8);
         oDomains = nBound - 1;                          // Other Domains
 
-        access_Matrix = new String [nBound] [mBound + nBound];
 
+        access_Matrix = new String [nBound] [mBound + oDomains];
+
+        mutex = new Semaphore(1);
+        area = new Semaphore(1);
         fileSem = new Semaphore[mBound];
+
+
         for (int i = 0; i < mBound; i++) {
             fileSem[i] = new Semaphore(1);
         }
         // Creating the array with the file acces and domain access established.
         for (int i = 0; i < nBound; i++) {
             // Fillin the second section array for the values
-            for (int j = 0; j < (mBound + nBound); j++) {
+            for (int j = 0; j < (mBound + oDomains); j++) {
                 if (j < mBound) {
-                    access_Matrix[i][j] = file_Access(i,j);
+                    access_Matrix[i][j] = file_Access(j);
                 }
 
                 else if (j - mBound == i) {
@@ -53,7 +58,7 @@ public class Access_Control_Matrix implements Runnable{
             System.out.printf("%-8s", "F" + i);
         }
 
-        for (int i = 0; i < nBound; i++) {
+        for (int i = 0; i < oDomains; i++) {
             System.out.printf("%-8s", "D" + i);
         }
         System.out.println();
@@ -77,21 +82,21 @@ public class Access_Control_Matrix implements Runnable{
     }
 
 //------------------------- [Start Filling matrix functions] --------------------//
-    static String file_Access(int i, int j) {
+    static String file_Access(int fileIndex) {
         int value = random.nextInt(0,4);
-        int randContent = random.nextInt((fileContents.length) + 1);
+        int randContent = random.nextInt(fileContents.length);
         if (value == 0) {
             return (" ");
         }
         else if (value == 1) {
-           // access_Matrix[i][j] = fileContents[randContent];
+           fileContents[fileIndex] = fileContents[randContent] ;
             return "R";
         }
         else if (value == 2) {
             return "W";
         }
         else {
-//            access_Matrix[i][j] = fileContents[randContent];
+            fileContents[fileIndex] = fileContents[randContent];
             return "R/W";
         }
     }
@@ -116,46 +121,63 @@ public class Access_Control_Matrix implements Runnable{
     public void threadFileAction (int fileIndex) {
         int rORw = random.nextInt(2); // 0 - Read, 1 - Write
         int randYield = random.nextInt(3, 8);
+        int randIndex = random.nextInt(fileContents.length );
+        String content = fileContents[randIndex];
         String permission = access_Matrix[currentDomain][fileIndex];
 
+
+
         if ("R".equals(permission) && rORw == 0 || "R/W".equals(permission) && rORw == 0) {
-            System.out.println("[Thread " + thread_ID + "(D" + thread_ID + " )] Attempting to read F" + fileIndex+ ":  Permission Granted. " + "Contents Read: ");
+            for(int i = 0; i < randYield ; i++) Thread.yield();
+            mutex.acquireUninterruptibly();
+            area.acquireUninterruptibly();
+            System.out.println("[Thread " + thread_ID + "(D" + thread_ID + " )] Attempting to read F" + fileIndex);
+            System.out.println( "[Thread " + thread_ID + "(D" + thread_ID + " )]" + ": Permission Granted. Reading " + fileContents[fileIndex] + " from F" + fileIndex);
+            System.out.println("[Thread " + thread_ID + "(D" + thread_ID + " )] Yielding " + randYield +" times");
             fileSem[fileIndex].acquireUninterruptibly();
             for (int i = 0; i < randYield; i++) {
                 Thread.yield();
             }
             fileSem[fileIndex].release();
+            area.release();
+            mutex.release();
             }
         else if ("W".equals(permission) && rORw == 1 || "R/W".equals(permission) && rORw == 1) {
-            System.out.println("[Thread " + thread_ID + "(D" + thread_ID + " )] Attempting to write F" + fileIndex + ":  Permission Granted......" );
+            for(int i = 0; i < randYield ; i++) Thread.yield();
+            area.acquireUninterruptibly();
+            System.out.println("[Thread " + thread_ID + "(D" + thread_ID + " )] Attempting to write F" + fileIndex);
+            System.out.println("[Thread " + thread_ID + "(D" + thread_ID + " )]"+ ":  Permission Granted. Writing " + "\"" + content +"\"" + " to file F" + fileIndex ); // Write
+            fileContents[fileIndex] = content;
+            System.out.println("[Thread " + thread_ID + "(D" + thread_ID + " )] Yielding " + randYield +" times");
             fileSem[fileIndex].acquireUninterruptibly();
             for (int i = 0; i < randYield; i++) {
                 Thread.yield();
             }
             fileSem[fileIndex].release();
-
-            } else {
+            area.release();
+        }
+        else {
                 System.out.println("[Thread " + thread_ID + "(D" + thread_ID + " )] Attempting to access F" + fileIndex + ":  Permission Denied....." );
-            }
-
+        }
     }
 
     public void threadDomainAction (int targetDomain) {
         String permission = access_Matrix[currentDomain][mBound + targetDomain];
-        if ("allow".equals(permission) && currentDomain != targetDomain){
-            System.out.println ("[Thread " + thread_ID + "(D" + currentDomain + " )] Attempting to switch from D"+ currentDomain + " to D" + targetDomain + ": Access Granted"); // Complete this part
 
+        System.out.println("[Thread " + thread_ID + "(D" + currentDomain +" )]"+"  is attempting to access D" + targetDomain + ".");
+        if ("allow".equals(permission) && currentDomain != targetDomain){
+            System.out.println ("[Thread " + thread_ID + "(D" + currentDomain + " )] Switching from D"+ currentDomain + " to D" + targetDomain + ": Access Granted"); // Complete this part
+            currentDomain = targetDomain;
             int randYield = random.nextInt(0, 8);
             for (int i = 0; i < randYield; i++) {
                 Thread.yield();
             }
-            currentDomain = targetDomain;
         }
         else if ("N/A".equals(permission) && currentDomain == targetDomain) {
             System.out.println("[Thread " + thread_ID + "(D" + currentDomain + " ) Attempting to switch into its own domain: Access Denied");
         }
         else {
-            System.out.println("[Thread " + thread_ID + "(D" + currentDomain +" )] Attempting to switch to D" + targetDomain + " : Access Denied");
+            System.out.println("[Thread " + thread_ID + "(D" + currentDomain +" )] Cannot Access D" + targetDomain + ". : Access Denied");
         }
     }
 
@@ -227,6 +249,9 @@ public class Access_Control_Matrix implements Runnable{
 *
 *           Report |     Task 1
 *           1. Is there any chance of deadlock in this simulation? What changes could cause deadlocks.
+*               If the amount of domains and files were on the minimum range and all the threads were attempting to access the same file, I think there may be a chance of deadlocking. If the yields were not set to the correct value,
+*               or if the release function was never called deadlocks would occur. Also, if the Semaphores were not initialized properly.
+*
 *
  */
 
