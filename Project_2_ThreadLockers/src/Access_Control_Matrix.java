@@ -129,38 +129,40 @@ public class Access_Control_Matrix implements Runnable{
 
         if ("R".equals(permission) && rORw == 0 || "R/W".equals(permission) && rORw == 0) {
             for(int i = 0; i < randYield ; i++) Thread.yield();
-            mutex.acquireUninterruptibly();
-            area.acquireUninterruptibly();
+
             System.out.println("[Thread " + thread_ID + "(D" + currentDomain + " )] Attempting to read F" + fileIndex);
             System.out.println( "[Thread " + thread_ID + "(D" + currentDomain + " )]" + ": Permission Granted. Reading " + fileContents[fileIndex] + " from F" + fileIndex);
             System.out.println("[Thread " + thread_ID + "(D" + currentDomain + " )] Yielding " + randYield +" times");
             fileSem[fileIndex].acquireUninterruptibly();
+            area.acquireUninterruptibly();
             for (int i = 0; i < randYield; i++) {
                 Thread.yield();
             }
-            fileSem[fileIndex].release();
             area.release();
-            mutex.release();
+            fileSem[fileIndex].release();
+
             }
         else if ("W".equals(permission) && rORw == 1 || "R/W".equals(permission) && rORw == 1) {
             for(int i = 0; i < randYield ; i++) Thread.yield();
-            area.acquireUninterruptibly();
+
             System.out.println("[Thread " + thread_ID + "(D" + currentDomain + " )] Attempting to write F" + fileIndex);
             System.out.println("[Thread " + thread_ID + "(D" + currentDomain + " )]"+ ":  Permission Granted. Writing " + "\"" + content +"\"" + " to file F" + fileIndex ); // Write
             fileContents[fileIndex] = content;
             System.out.println("[Thread " + thread_ID + "(D" + currentDomain + " )] Yielding " + randYield +" times");
             fileSem[fileIndex].acquireUninterruptibly();
+            area.acquireUninterruptibly();
             for (int i = 0; i < randYield; i++) {
                 Thread.yield();
             }
-            fileSem[fileIndex].release();
             area.release();
+            fileSem[fileIndex].release();
+
         }
         else {
             System.out.println("[Thread " + thread_ID + "(D" + currentDomain + " )] Attempting to access F" + fileIndex + ":  Permission Denied....." );
             for(int i = 0; i < randYield ; i++) Thread.yield();
             System.out.println("[Thread " + thread_ID + "(D" + currentDomain + " )] Yielding " + randYield +" times");
-            fileSem[fileIndex].acquireUninterruptibly();
+            //fileSem[fileIndex].acquireUninterruptibly();
         }
     }
 
